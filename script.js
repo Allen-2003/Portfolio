@@ -261,59 +261,116 @@ if (contactForm) {
     });
 }
 
-// Interactive Peaking Avatar eye-tracking and tilt
-const leftPupil = document.getElementById('left-pupil');
-const rightPupil = document.getElementById('right-pupil');
-const leftEyeSclera = document.getElementById('left-eye-sclera');
-const rightEyeSclera = document.getElementById('right-eye-sclera');
-const peakingAvatarContainer = document.querySelector('.peaking-avatar-container');
+// Interactive Full Body Avatar Tracking & Tilt
+const fullbodyContainer = document.getElementById('fullbody-avatar-container');
+const fullbodyAvatarImg = document.getElementById('fullbody-avatar-img');
 
-if (leftPupil && rightPupil && leftEyeSclera && rightEyeSclera && peakingAvatarContainer) {
-    document.addEventListener('mousemove', (e) => {
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
+// Preload the snapping pose image to prevent any rendering flicker on the first click
+const snapImgPreload = new Image();
+snapImgPreload.src = 'fullbody_avatar_snap.png';
 
-        // 1. Calculate pupil tracking offsets
-        const leftRect = leftEyeSclera.getBoundingClientRect();
-        const rightRect = rightEyeSclera.getBoundingClientRect();
+document.addEventListener('mousemove', (e) => {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
 
-        const leftCenterX = leftRect.left + leftRect.width / 2;
-        const leftCenterY = leftRect.top + leftRect.height / 2;
-        const rightCenterX = rightRect.left + rightRect.width / 2;
-        const rightCenterY = rightRect.top + rightRect.height / 2;
+    // Gently lean/tilt the capsule towards the mouse
+    if (fullbodyContainer) {
+        const rect = fullbodyContainer.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
 
-        const leftDx = mouseX - leftCenterX;
-        const leftDy = mouseY - leftCenterY;
-        const leftAngle = Math.atan2(leftDy, leftDx);
-        // Map distance to a max of 2px pupil shift
-        const leftDist = Math.min(2.0, Math.hypot(leftDx, leftDy) / 45);
+        const dx = mouseX - centerX;
+        const dy = mouseY - centerY;
 
-        const rightDx = mouseX - rightCenterX;
-        const rightDy = mouseY - rightCenterY;
-        const rightAngle = Math.atan2(rightDy, rightDx);
-        const rightDist = Math.min(2.0, Math.hypot(rightDx, rightDy) / 45);
+        const tiltX = Math.min(4, Math.max(-4, dx / 150));
+        const tiltY = Math.min(3, Math.max(-3, dy / 180));
 
-        const leftTx = Math.cos(leftAngle) * leftDist;
-        const leftTy = Math.sin(leftAngle) * leftDist;
-        const rightTx = Math.cos(rightAngle) * rightDist;
-        const rightTy = Math.sin(rightAngle) * rightDist;
+        fullbodyContainer.style.transform = `translate(${tiltX}px, ${tiltY}px)`;
+    }
+});
 
-        leftPupil.setAttribute('transform', `translate(${leftTx}, ${leftTy})`);
-        rightPupil.setAttribute('transform', `translate(${rightTx}, ${rightTy})`);
+// Full Body Avatar Snapping Logic (Triggers capsule shake & particles)
+let isSnapping = false;
 
-        // 2. Calculate avatar container slight tilt/shift towards mouse
-        const containerRect = peakingAvatarContainer.getBoundingClientRect();
-        const containerCenterX = containerRect.left + containerRect.width / 2;
-        const containerCenterY = containerRect.top + containerRect.height / 2;
+function triggerFullbodySnap() {
+    if (isSnapping || !fullbodyContainer) return;
+    isSnapping = true;
 
-        const containerDx = mouseX - containerCenterX;
-        const containerDy = mouseY - containerCenterY;
+    // Switch image source to the snapping pose
+    if (fullbodyAvatarImg) {
+        fullbodyAvatarImg.src = 'fullbody_avatar_snap.png';
+    }
 
-        // Gently translate and tilt the container towards the mouse
-        const tiltX = Math.min(5, Math.max(-5, containerDx / 120));
-        const tiltY = Math.min(4, Math.max(-4, containerDy / 150));
+    // Trigger visual scale and capsule snap effects
+    fullbodyContainer.classList.add('is-snapping');
+
+    // Create cyber snapping particles
+    createSnapBinaryParticles(fullbodyContainer);
+
+    // Revert back to resting state after 600ms
+    setTimeout(() => {
+        if (fullbodyAvatarImg) {
+            fullbodyAvatarImg.src = 'fullbody_avatar.png';
+        }
+        fullbodyContainer.classList.remove('is-snapping');
+        isSnapping = false;
+    }, 600);
+}
+
+if (fullbodyContainer) {
+    fullbodyContainer.addEventListener('click', triggerFullbodySnap);
+}
+
+// Trigger snap when clicking any project cards, skill category, timeline items, cert items, or edu cards
+document.addEventListener('click', (e) => {
+    const cardSelectors = '.project-card, .skill-category, .skill-tag, .timeline-content, .edu-card, .cert-item, .summary-card, .btn, .interactive';
+    const targetCard = e.target.closest(cardSelectors);
+    
+    // Make sure we didn't just click the avatar itself
+    if (targetCard && !fullbodyContainer.contains(targetCard)) {
+        triggerFullbodySnap();
+    }
+});
+
+// Helper to spawn binary digit particles spraying from the snap
+function createSnapBinaryParticles(container) {
+    const rect = container.getBoundingClientRect();
+    const handX = rect.left + rect.width / 2;
+    const handY = rect.top + rect.height * 0.35; // Chest level where hands meet
+
+    for (let i = 0; i < 8; i++) {
+        const span = document.createElement('span');
+        span.className = 'snap-binary-particle';
+        span.innerText = Math.random() > 0.5 ? '1' : '0';
+        span.style.left = handX + 'px';
+        span.style.top = handY + 'px';
         
-        // Apply transform
-        peakingAvatarContainer.style.transform = `translate(${tiltX}px, ${tiltY}px)`;
-    });
+        const angle = -Math.PI/6 - Math.random() * (Math.PI * 2/3);
+        const speed = 1.5 + Math.random() * 3.5;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+        
+        document.body.appendChild(span);
+        
+        let posX = handX;
+        let posY = handY;
+        let opacity = 1.0;
+        
+        function animate() {
+            posX += vx;
+            posY += vy;
+            opacity -= 0.035;
+            
+            span.style.left = posX + 'px';
+            span.style.top = posY + 'px';
+            span.style.opacity = opacity;
+            
+            if (opacity > 0) {
+                requestAnimationFrame(animate);
+            } else {
+                span.remove();
+            }
+        }
+        requestAnimationFrame(animate);
+    }
 }
