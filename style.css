@@ -159,6 +159,23 @@ header.site-header {
     color: var(--accent);
 }
 
+.nav-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 12px;
+    object-fit: cover;
+    border: 1.5px solid var(--accent);
+    box-shadow: 0 0 8px rgba(255, 19, 19, 0.3);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s;
+}
+
+.site-title:hover .nav-avatar {
+    transform: scale(1.1) rotate(15deg);
+    border-color: #ffffff;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
 nav.navbar-menu {
     display: flex;
     align-items: center;
@@ -338,11 +355,16 @@ section {
 
 /* Hero Section */
 .hero-section {
-    min-height: 100vh;
+    min-height: 82vh;
     display: flex;
     align-items: center;
     padding-top: 120px;
-    padding-bottom: 80px;
+    padding-bottom: 100px;
+}
+
+/* Specific section spacing tweaks */
+#about {
+    padding-top: 120px;
 }
 
 .hero-grid {
@@ -571,18 +593,20 @@ section {
 /* Skills Layout */
 .skills-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 2rem;
 }
 
 .skill-category {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    padding: 2rem;
+    padding: 1.5rem 1.25rem;
     border-radius: 12px;
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .skill-category:hover {
@@ -605,19 +629,26 @@ section {
 }
 
 .skill-tags {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 0.75rem;
+    flex-grow: 1;
 }
 
 .skill-tag {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 6px 14px;
+    padding: 8px 12px;
     border-radius: 6px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--main-font-color);
     transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 42px;
 }
 
 .skill-tag:hover {
@@ -1203,7 +1234,8 @@ footer p span {
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.1s ease-out;
+    opacity: 0;
+    transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.1s ease-out, opacity 1s ease-in-out;
 }
 
 .fullbody-avatar-container:hover {
@@ -1225,5 +1257,32 @@ footer p span {
 /* On snap, let the avatar jump/shrink slightly */
 .fullbody-avatar-container.is-snapping #fullbody-avatar-img {
     transform: scale(0.92) translateY(3px);
+}
+
+/* Fade-in Entrance System */
+.site-header,
+main,
+.three-lines-wrp,
+.accent-bg-glow,
+.accent-bg-glow-left {
+    opacity: 0;
+    transition: opacity 1s ease-in-out, transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+main {
+    transform: translateY(30px);
+}
+
+body.content-ready .site-header,
+body.content-ready main,
+body.content-ready .three-lines-wrp,
+body.content-ready .fullbody-avatar-container,
+body.content-ready .accent-bg-glow,
+body.content-ready .accent-bg-glow-left {
+    opacity: 1;
+}
+
+body.content-ready main {
+    transform: translateY(0);
 }
 

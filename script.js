@@ -9,8 +9,8 @@ class TextScramble {
         const promise = new Promise((resolve) => this.resolve = resolve);
         this.queue = [];
         const length = newText.length;
-        const step = 5; // frame delay between each letter starting to scramble
-        const scrambleDuration = 10; // how many frames each letter scrambles
+        const step = 10; // frame delay between each letter starting to scramble (slower start)
+        const scrambleDuration = 22; // how many frames each letter scrambles (scramble longer)
         
         for (let i = 0; i < length; i++) {
             const from = ' '; // start as empty space
@@ -111,38 +111,46 @@ function drawMatrix() {
 
 const loaderInterval = loader ? setInterval(drawMatrix, 33) : null;
 
-// Remove Loader on Window Load
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        if (loaderInterval) clearInterval(loaderInterval);
-        const loaderWrp = document.querySelector('.loader-wrapper');
-        if (loaderWrp) {
-            loaderWrp.classList.add('loader-wrapper--hidden');
-            setTimeout(() => {
-                loaderWrp.remove();
-            }, 500);
-        }
+// Pre-clear scramble title to prevent showing static text during fade-in
+const scrambleTitleOnLoad = document.getElementById('scramble-title');
+if (scrambleTitleOnLoad) {
+    scrambleTitleOnLoad.innerHTML = '';
+}
 
-        // Trigger Text Scramble
-        const scrambleTitle = document.getElementById('scramble-title');
-        if (scrambleTitle) {
-            const scrambler = new TextScramble(scrambleTitle);
-            scrambler.setText(scrambleTitle.getAttribute('data-text'));
-        }
-    }, 1500); // 1.5 second matrix rain loader play
-});
+let entranceInitiated = false;
+function initiatePageEntrance() {
+    if (entranceInitiated) return;
+    entranceInitiated = true;
 
-// Fallback loader removal (if load event doesn't fire fast enough)
-setTimeout(() => {
+    if (loaderInterval) clearInterval(loaderInterval);
     const loaderWrp = document.querySelector('.loader-wrapper');
     if (loaderWrp) {
-        if (loaderInterval) clearInterval(loaderInterval);
         loaderWrp.classList.add('loader-wrapper--hidden');
         setTimeout(() => {
             loaderWrp.remove();
         }, 500);
     }
-}, 3000);
+
+    // Start content fade-in by adding content-ready to body
+    document.body.classList.add('content-ready');
+
+    // Trigger Text Scramble after content is formed (1s fade transition)
+    setTimeout(() => {
+        const scrambleTitle = document.getElementById('scramble-title');
+        if (scrambleTitle) {
+            const scrambler = new TextScramble(scrambleTitle);
+            scrambler.setText(scrambleTitle.getAttribute('data-text'));
+        }
+    }, 1000);
+}
+
+// Remove Loader on Window Load
+window.addEventListener('load', () => {
+    setTimeout(initiatePageEntrance, 1200); // 1.2 second matrix rain loader play
+});
+
+// Fallback loader removal (if load event doesn't fire fast enough)
+setTimeout(initiatePageEntrance, 3000);
 
 // Custom Cursor movements
 const cursorDot = document.querySelector('.cursor-dot');
