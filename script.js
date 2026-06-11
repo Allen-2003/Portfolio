@@ -323,6 +323,11 @@ if (fullbodyContainer) {
 
 // Trigger snap when clicking any project cards, skill category, timeline items, cert items, or edu cards
 document.addEventListener('click', (e) => {
+    // Explicitly exclude any clicks on titles (scramble title, section titles, or site title)
+    if (e.target.closest('.scramble-title, .section-title, .site-title')) {
+        return;
+    }
+
     const cardSelectors = '.project-card, .skill-category, .skill-tag, .timeline-content, .edu-card, .cert-item, .summary-card, .btn, .interactive';
     const targetCard = e.target.closest(cardSelectors);
     
