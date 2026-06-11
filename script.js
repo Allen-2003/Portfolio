@@ -304,9 +304,6 @@ function triggerFullbodySnap() {
     // Trigger visual scale and capsule snap effects
     fullbodyContainer.classList.add('is-snapping');
 
-    // Create cyber snapping particles
-    createSnapBinaryParticles(fullbodyContainer);
-
     // Revert back to resting state after 600ms
     setTimeout(() => {
         if (fullbodyAvatarImg) {
@@ -337,45 +334,3 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Helper to spawn binary digit particles spraying from the snap
-function createSnapBinaryParticles(container) {
-    const rect = container.getBoundingClientRect();
-    const handX = rect.left + rect.width / 2;
-    const handY = rect.top + rect.height * 0.35; // Chest level where hands meet
-
-    for (let i = 0; i < 8; i++) {
-        const span = document.createElement('span');
-        span.className = 'snap-binary-particle';
-        span.innerText = Math.random() > 0.5 ? '1' : '0';
-        span.style.left = handX + 'px';
-        span.style.top = handY + 'px';
-        
-        const angle = -Math.PI/6 - Math.random() * (Math.PI * 2/3);
-        const speed = 1.5 + Math.random() * 3.5;
-        const vx = Math.cos(angle) * speed;
-        const vy = Math.sin(angle) * speed;
-        
-        document.body.appendChild(span);
-        
-        let posX = handX;
-        let posY = handY;
-        let opacity = 1.0;
-        
-        function animate() {
-            posX += vx;
-            posY += vy;
-            opacity -= 0.035;
-            
-            span.style.left = posX + 'px';
-            span.style.top = posY + 'px';
-            span.style.opacity = opacity;
-            
-            if (opacity > 0) {
-                requestAnimationFrame(animate);
-            } else {
-                span.remove();
-            }
-        }
-        requestAnimationFrame(animate);
-    }
-}

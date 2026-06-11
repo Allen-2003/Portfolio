@@ -1258,14 +1258,3 @@ footer p span {
     }
 }
 
-/* Snap Particle animations */
-.snap-binary-particle {
-    position: fixed;
-    pointer-events: none;
-    z-index: 1000;
-    color: var(--accent);
-    font-family: 'Space Grotesk', monospace;
-    font-size: 0.9rem;
-    font-weight: bold;
-    text-shadow: 0 0 8px var(--accent);
-}
