@@ -260,3 +260,60 @@ if (contactForm) {
         contactForm.reset();
     });
 }
+
+// Interactive Peaking Avatar eye-tracking and tilt
+const leftPupil = document.getElementById('left-pupil');
+const rightPupil = document.getElementById('right-pupil');
+const leftEyeSclera = document.getElementById('left-eye-sclera');
+const rightEyeSclera = document.getElementById('right-eye-sclera');
+const peakingAvatarContainer = document.querySelector('.peaking-avatar-container');
+
+if (leftPupil && rightPupil && leftEyeSclera && rightEyeSclera && peakingAvatarContainer) {
+    document.addEventListener('mousemove', (e) => {
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+
+        // 1. Calculate pupil tracking offsets
+        const leftRect = leftEyeSclera.getBoundingClientRect();
+        const rightRect = rightEyeSclera.getBoundingClientRect();
+
+        const leftCenterX = leftRect.left + leftRect.width / 2;
+        const leftCenterY = leftRect.top + leftRect.height / 2;
+        const rightCenterX = rightRect.left + rightRect.width / 2;
+        const rightCenterY = rightRect.top + rightRect.height / 2;
+
+        const leftDx = mouseX - leftCenterX;
+        const leftDy = mouseY - leftCenterY;
+        const leftAngle = Math.atan2(leftDy, leftDx);
+        // Map distance to a max of 2px pupil shift
+        const leftDist = Math.min(2.0, Math.hypot(leftDx, leftDy) / 45);
+
+        const rightDx = mouseX - rightCenterX;
+        const rightDy = mouseY - rightCenterY;
+        const rightAngle = Math.atan2(rightDy, rightDx);
+        const rightDist = Math.min(2.0, Math.hypot(rightDx, rightDy) / 45);
+
+        const leftTx = Math.cos(leftAngle) * leftDist;
+        const leftTy = Math.sin(leftAngle) * leftDist;
+        const rightTx = Math.cos(rightAngle) * rightDist;
+        const rightTy = Math.sin(rightAngle) * rightDist;
+
+        leftPupil.setAttribute('transform', `translate(${leftTx}, ${leftTy})`);
+        rightPupil.setAttribute('transform', `translate(${rightTx}, ${rightTy})`);
+
+        // 2. Calculate avatar container slight tilt/shift towards mouse
+        const containerRect = peakingAvatarContainer.getBoundingClientRect();
+        const containerCenterX = containerRect.left + containerRect.width / 2;
+        const containerCenterY = containerRect.top + containerRect.height / 2;
+
+        const containerDx = mouseX - containerCenterX;
+        const containerDy = mouseY - containerCenterY;
+
+        // Gently translate and tilt the container towards the mouse
+        const tiltX = Math.min(5, Math.max(-5, containerDx / 120));
+        const tiltY = Math.min(4, Math.max(-4, containerDy / 150));
+        
+        // Apply transform
+        peakingAvatarContainer.style.transform = `translate(${tiltX}px, ${tiltY}px)`;
+    });
+}
